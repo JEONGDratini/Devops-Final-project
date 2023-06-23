@@ -8,11 +8,11 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  ECR_REPOSITORY: taskmanagement_ecr
-  ECS_SERVICE: Taskmanagement_svc
-  ECS_CLUSTER: Taskmanagement-cluster
+  ECR_REPOSITORY: taskmanagement_ecr2
+  ECS_SERVICE: my-ecs-service
+  ECS_CLUSTER: Taskmanagement-cluster2
   ECS_TASK_DEFINITION: ./aws.json
-  CONTAINER_NAME: Taskmanagement_container
+  CONTAINER_NAME: Taskmanagement_container2
 
 permissions:
   contents: read
