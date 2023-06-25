@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  ECR_REPOSITORY: taskmanagement_ecr2
+  ECR_REPOSITORY: taskmanagement-ecr2
   ECS_SERVICE: my-ecs-service
   ECS_CLUSTER: Taskmanagement-cluster2
   ECS_TASK_DEFINITION: ./aws.json
