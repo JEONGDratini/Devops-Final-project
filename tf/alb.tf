@@ -7,6 +7,7 @@ resource "aws_alb" "my_alb" {
   enable_cross_zone_load_balancing = true
 }
 
+
 resource "aws_lb_listener" "lb_listener" {
   load_balancer_arn = aws_alb.my_alb.arn
   port              = 80
