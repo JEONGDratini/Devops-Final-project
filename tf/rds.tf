@@ -23,6 +23,7 @@ resource "aws_db_parameter_group" "project-rds-params" {
 
 # RDS인스턴스 생성
 resource "aws_db_instance" "task-database-mk2" {
+  identifier           = "task-database-mk2"
   allocated_storage    = 20
   engine               = "mysql"
   engine_version       = "8.0.32"
