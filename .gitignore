@@ -22,7 +22,7 @@ crash.log
 # are not checked in
 override.tf
 override.tf.json
-variable.tf
+variables.tf
 *_override.tf
 *_override.tf.json
 
