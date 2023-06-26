@@ -42,13 +42,14 @@ resource "aws_api_gateway_method" "post_root_method" {
 
 # Configure integrations for the POST methods
 resource "aws_api_gateway_integration" "post_root_integration" {
-  rest_api_id          = aws_api_gateway_rest_api.authorization_api.id
-  resource_id          = aws_api_gateway_rest_api.authorization_api.root_resource_id
-  http_method          = aws_api_gateway_method.post_root_method.http_method
-  type                 = "HTTP_PROXY"
-  uri                  = "http://${aws_alb.my_alb.dns_name}/"
+  rest_api_id             = aws_api_gateway_rest_api.authorization_api.id
+  resource_id             = aws_api_gateway_rest_api.authorization_api.root_resource_id
+  http_method             = aws_api_gateway_method.post_root_method.http_method
+  type                    = "HTTP_PROXY"
+  uri                     = "http://${aws_alb.my_alb.dns_name}/"
   integration_http_method = "POST"
 }
+
 
 # =========================================================================
 # DynamoDB 리소스 '/dynamodb_user'
@@ -61,7 +62,7 @@ resource "aws_api_gateway_resource" "dynamodb_user_resource" {
 resource "aws_api_gateway_integration" "post_dynamodb_user_integration" {
   rest_api_id             = aws_api_gateway_rest_api.authorization_api.id
   resource_id             = aws_api_gateway_resource.dynamodb_user_resource.id
-  http_method             = "POST"
+  http_method             = aws_api_gateway_method.post_dynamodb_user_method.http_method
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.userLambda.invoke_arn
   integration_http_method = "POST"
@@ -89,10 +90,11 @@ resource "aws_api_gateway_method" "options_dynamodb_user_method" {
 
 # Configure integrations for the OPTIONS methods
 resource "aws_api_gateway_integration" "options_dynamodb_user_integration" {
-  rest_api_id = aws_api_gateway_rest_api.authorization_api.id
-  resource_id = aws_api_gateway_resource.dynamodb_user_resource.id
-  http_method = "OPTIONS"
-  type        = "MOCK"
+  rest_api_id             = aws_api_gateway_rest_api.authorization_api.id
+  resource_id             = aws_api_gateway_resource.dynamodb_user_resource.id
+  http_method             = aws_api_gateway_method.options_dynamodb_user_method.http_method
+  type                    = "MOCK"
+  integration_http_method = "OPTIONS"
 }
 
 # =========================================================================
@@ -192,3 +194,35 @@ resource "aws_api_gateway_integration_response" "cors_options_integration_respon
   }
 }
 
+# Create API Gateway Deployment
+resource "aws_api_gateway_deployment" "deployment" {
+  rest_api_id = aws_api_gateway_rest_api.authorization_api.id
+  stage_name  = "stage2"
+
+  depends_on = [
+    aws_api_gateway_integration.post_root_integration,
+    aws_api_gateway_integration.options_dynamodb_user_integration,
+  ]
+}
+
+# Associate Deployment with Stage
+resource "aws_api_gateway_stage" "stage" {
+  deployment_id = aws_api_gateway_deployment.deployment.id
+  rest_api_id   = aws_api_gateway_rest_api.authorization_api.id
+  stage_name    = "stage"
+}
+
+# Deploy API Gateway Stage
+resource "aws_api_gateway_deployment" "deploy" {
+  depends_on       = [aws_api_gateway_stage.stage]
+  rest_api_id      = aws_api_gateway_rest_api.authorization_api.id
+  stage_name       = aws_api_gateway_stage.stage.stage_name
+}
+resource "aws_api_gateway_integration" "lambda_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.authorization_api.id
+  resource_id             = aws_api_gateway_resource.dynamodb_user_resource.id
+  http_method             = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.userLambda.invoke_arn
+  integration_http_method = "POST"
+}
