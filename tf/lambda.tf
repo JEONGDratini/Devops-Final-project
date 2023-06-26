@@ -1,7 +1,6 @@
 # 3. Lambda
 
 # 람다 함수 생성 
-
 resource "aws_lambda_function" "userLambda" {
   filename      = "lambda_function_payload.zip"
   function_name = "userLambda"
@@ -19,17 +18,15 @@ resource "aws_lambda_function" "userLambda" {
   }
 }
 
-
-
 # IAM 역할 생성
 resource "aws_iam_role" "lambda_iam" {
   name = "lambdaIAM"
   assume_role_policy = jsonencode({
-    Version = "2012-10-17",
+    Version   = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
         Principal = {
           Service = "lambda.amazonaws.com"
         }
@@ -44,29 +41,35 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-
 # IAM 정책 생성 (  Lambda 함수가 DynamoDB 테이블에 액세스 )
 resource "aws_iam_role_policy" "lambda_policy" {
-  name = "lambdaPolicy"
-  role = aws_iam_role.lambda_iam.id
+  name   = "lambdaPolicy"
+  role   = aws_iam_role.lambda_iam.id
   policy = jsonencode({
-    Version = "2012-10-17",
+    Version   = "2012-10-17"
     Statement = [
       {
-        Action = [
+        Action   = [
           "dynamodb:GetItem",
           "dynamodb:Scan",
           "dynamodb:Query",
           "dynamodb:PutItem",
           "dynamodb:UpdateItem",
           "dynamodb:DeleteItem"
-        ],
-        Effect = "Allow",
+        ]
+        Effect   = "Allow"
         Resource = aws_dynamodb_table.dynamodb_user.arn
       },
     ]
   })
 }
 
+# Lambda 함수와 API Gateway 연결을 위한 권한 설정
+resource "aws_lambda_permission" "apigw_lambda_permission" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.userLambda.function_name
+  principal     = "apigateway.amazonaws.com"
 
-
+  source_arn = "${aws_api_gateway_rest_api.authorization_api.execution_arn}/*"
+}
