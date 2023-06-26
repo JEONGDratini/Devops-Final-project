@@ -26,6 +26,7 @@ resource "aws_ecs_cluster" "Taskmanagement-cluster2" {
     weight            = 1
     base              = 1
   }
+
 }
 
 resource "aws_launch_configuration" "my-launch-config" {
@@ -143,6 +144,7 @@ resource "aws_ecs_service" "my-service" {
   cluster         = var.cluster_name
   task_definition = aws_ecs_task_definition.my-task-definition.arn
   desired_count   = 1
+  launch_type     = "EC2"
 
   load_balancer {
   target_group_arn = aws_lb_target_group.my-target-group.arn
