@@ -3,6 +3,8 @@ name: Deploy to Amazon ECS
 on:
   push:
     branches: [ "gittest" ]
+    paths: 
+      - 'Task/**'
 
 env:
   AWS_REGION: ap-northeast-2

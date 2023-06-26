@@ -1,6 +1,10 @@
 resource "aws_vpc" "my-vpc" {
-  cidr_block = "10.0.0.0/16"
-  instance_tenancy = "default"
+    cidr_block = "10.0.0.0/16"
+    enable_dns_support   = true
+    enable_dns_hostnames = true
+    tags       = {
+        Name = "Terraform VPC"
+    }
 }
 
 # create subnet
@@ -8,22 +12,40 @@ resource "aws_subnet" "PublicSubnet01" {
   vpc_id = aws_vpc.my-vpc.id
   cidr_block = "10.0.1.0/24"
   availability_zone = "ap-northeast-2a"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "my-public-subnet01"
+  }
 }
 
 resource "aws_subnet" "PublicSubnet02" {
   vpc_id = aws_vpc.my-vpc.id
   cidr_block = "10.0.2.0/24"
   availability_zone = "ap-northeast-2c"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "my-public-subnet02"
+  }
 }
 resource "aws_subnet" "PrivateSubnet01" {
   vpc_id = aws_vpc.my-vpc.id
   cidr_block = "10.0.3.0/24"
   availability_zone = "ap-northeast-2a"
+  
+  tags = {
+    Name = "my-private-subnet01"
+  }
 }
 resource "aws_subnet" "PrivateSubnet02" {
   vpc_id = aws_vpc.my-vpc.id
   cidr_block = "10.0.4.0/24"
   availability_zone = "ap-northeast-2c"
+  
+  tags = {
+    Name = "my-private-subnet02"
+  }
 }
 
 # 인터넷 게이트웨이 ( 외부 인터넷에 연결하기 위함 )
