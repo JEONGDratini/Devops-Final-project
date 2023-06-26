@@ -6,15 +6,20 @@ resource "aws_ecr_repository" "my-repo" {
   }
 }
 
-resource "aws_ecs_cluster" "my-cluster" {
-  name = "Taskmanagement-cluster2"
+variable "cluster_name" {
+  description = "The name of the ECS cluster"
+  default     = "Taskmanagement-cluster2"
+}
+
+resource "aws_ecs_cluster" "Taskmanagement-cluster2" {
+  name = var.cluster_name
 
   setting {
     name  = "containerInsights"
     value = "enabled"
   }
 
-  capacity_providers = [aws_ecs_capacity_provider.capacity_provider.name]
+  capacity_providers = ["FARGATE", "FARGATE_SPOT", aws_ecs_capacity_provider.capacity_provider.name]
 
   default_capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.capacity_provider.name
@@ -31,8 +36,12 @@ resource "aws_launch_configuration" "my-launch-config" {
   key_name      = "hoonology"
   user_data = <<-EOF
               #!/bin/bash
-              echo ECS_CLUSTER="Taskmanagement-cluster2" >> /etc/ecs/ecs.config
+              echo ECS_CLUSTER="${var.cluster_name}" >> /etc/ecs/ecs.config
               EOF
+
+  lifecycle {
+  create_before_destroy = true
+  }
 }
 
 resource "aws_autoscaling_group" "my-asg" {
@@ -41,7 +50,7 @@ resource "aws_autoscaling_group" "my-asg" {
   min_size                  = 1
   max_size                  = 3
   desired_capacity          = 1
-  vpc_zone_identifier       = [aws_subnet.PublicSubnet01.id]
+  vpc_zone_identifier       = [aws_subnet.PublicSubnet01.id, aws_subnet.PublicSubnet02.id]
 }
 
 resource "aws_ecs_capacity_provider" "capacity_provider" {
@@ -131,13 +140,24 @@ resource "aws_ecs_task_definition" "my-task-definition" {
 # Create a service
 resource "aws_ecs_service" "my-service" {
   name            = "my-ecs-service"
-  cluster         = aws_ecs_cluster.my-cluster.id
+  cluster         = var.cluster_name
   task_definition = aws_ecs_task_definition.my-task-definition.arn
   desired_count   = 1
-  launch_type     = "EC2"
+
+  load_balancer {
+  target_group_arn = aws_lb_target_group.my-target-group.arn
+  container_name   = "Taskmanagement_container2"
+  container_port   = 3000
+  }
   
   network_configuration {
-    subnets          = [aws_subnet.PublicSubnet01.id]
+    subnets          = [aws_subnet.PublicSubnet01.id, aws_subnet.PublicSubnet02.id]
     security_groups  = [aws_security_group.my-SG.id]
+  }
+
+    # Auto Scaling Group과 연결
+  capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.capacity_provider.name
+    weight            = 1
   }
 }
