@@ -2,7 +2,7 @@ name: workflow for S3 Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
     paths: 
       - 'Front/**' 
 
