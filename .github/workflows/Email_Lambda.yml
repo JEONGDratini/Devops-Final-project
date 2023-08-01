@@ -2,7 +2,7 @@ name: Deploy to Email Lambda
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
     paths: 
       - 'Email/**'
 
