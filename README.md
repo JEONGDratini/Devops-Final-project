@@ -38,6 +38,20 @@ https://docs.google.com/presentation/d/1A6nd_WcityqFIknwzVEpzRsgm7nvGPgxpVvEOD_b
 
 <br>
 
+#  CRUD API 명세
+
+[API](https://docs.google.com/spreadsheets/d/16TmUODKyEjoQWa39oxZd9cOC5y3H_j9pezJz9fYgPGI/edit#gid=0)
+
+URL | Method | Function | Req | Res
+-- | -- | -- | -- | --
+/api/sign_in | GET | 로그인 요청 | { "email": "(email)", "password": "(password)" } | { "message": "사용자가 성공적으로 로그인했습니다.", "email": "(email)"}
+/api/tasks | POST | 작업 추가 | { "Task_name": "(Task_name)", "Task_contents": "(Task_contents)", "Task_status": "(Task_status)", "Deadline": "(Deadline)", "PIC": "(PIC)", "Supervisor": "(Supervisor)" } | { "message": "작업이 성공적으로 생성되었습니다.", "Task_id": "(Task_id)" }
+/api/tasks/(task_id) | PUT | 특정 작업 수정 | { "Task_contents": "(Task_contents)", "Task_status": "(Task_status)", "Deadline": "(Deadline)", "PIC": "(PIC)" } | { "message": "작업이 성공적으로 업데이트되었습니다." }
+/api/tasks/(task_id) | DELETE | 특정 작업 삭제 | { "Task_id": "(Task_id)" } | { "message": "작업이 성공적으로 삭제되었습니다" ,"Task_id": "(Task_id)", "Task_name": "(Task_name)"}
+/api/tasks | GET | 전체 작업 조회 |   | { "message": "전체 작업 조회" }
+
+<br>
+
 ### **1. 코드 수정 및 Image Push**
 ---
  Git Action은 GitHub 레포지토리의 코드가 수정될 때마다 빌드를 트리거해서 자동으로 각 코드들이 배포되어야할 리소스로 배포합니다. 구현한 CRUD 이미지는 Git Action이 자동으로 만들어둔 ECR(Elastic Container Registry)에 이미지를 Push합니다. 또한, Push된 이미지를 지정한 ECS의 서비스 내에 작업을 생성합니다. <br>
