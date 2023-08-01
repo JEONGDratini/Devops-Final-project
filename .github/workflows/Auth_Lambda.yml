@@ -2,7 +2,7 @@ name: Deploy to Auth Lambda
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
     paths: 
       - 'Auth/**'
 
