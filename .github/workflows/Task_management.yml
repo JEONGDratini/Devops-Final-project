@@ -11,7 +11,6 @@ env:
   ECR_REPOSITORY: taskmanagement-ecr2
   ECS_SERVICE: my-ecs-service
   ECS_CLUSTER: Taskmanagement-cluster2
-  ECS_TASK_DEFINITION: ./aws.json
   CONTAINER_NAME: Taskmanagement_container2
 
 permissions:
@@ -54,7 +53,12 @@ jobs:
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
       working-directory: ${{ env.working-directory }}
     
-
+    - name: Retrieve most recent ECS task definition JSON file
+      id: retrieve-task-def
+      run: |
+        aws ecs describe-task-definition --task-definition [task-definition family name] --query taskDefinition > task-definition.json
+        cat task-definition.json
+        echo "::set-output name=task-def-file::task-definition.json"
 
 # $GITHUB_OUTPUT
 
@@ -62,7 +66,7 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        task-definition: ${{ steps.retrieve-task-def.outputs.task-def-file }}
         container-name: ${{ env.CONTAINER_NAME }}
         image: ${{ steps.build-image.outputs.image }}
 
